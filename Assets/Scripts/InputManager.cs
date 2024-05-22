@@ -16,6 +16,11 @@ public class InputManager : MonoBehaviour {
         public bool fly;
     }
 
+    public event EventHandler<OnInputReceived_EventArgs> OnInputReceived;
+    public class OnInputReceived_EventArgs : EventArgs {
+        public int command;
+    }
+
     private InputActions inputActions;
     private Process pythonProcess;
     private string pythonScriptPath = "Assets/Scripts/DroneController.py";
@@ -102,9 +107,7 @@ public class InputManager : MonoBehaviour {
     }
 
     void OnOutputReceived(object sender, DataReceivedEventArgs e) {
-        if (!string.IsNullOrEmpty(e.Data)) {
-            print("Python Output: " + e.Data);
-        }
+        OnInputReceived?.Invoke(this, new() { command = Int32.Parse(e.Data) });
     }
 
     void OnErrorReceived(object sender, DataReceivedEventArgs e) {

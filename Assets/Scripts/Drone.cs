@@ -15,10 +15,13 @@ public class Drone : MonoBehaviour {
     private float propelerMaxRotateSpeed = 2160f;
     private float[] propelerRotateSpeeds;
 
+    private float flyDuration = 0;
+
     private void Start() {
         rb = GetComponent<Rigidbody>();
         InputManager.Instance.OnMovePerformed += InputManager_OnMovePerformed;
         InputManager.Instance.OnFlyPerformed += InputManager_OnFlyPerformed;
+        InputManager.Instance.OnInputReceived += InputManager_OnInputReceived;
 
         propelerRotateSpeeds = new float[propelers.Count];
     }
@@ -30,10 +33,10 @@ public class Drone : MonoBehaviour {
         rb.MoveRotation(newRotation);
 
         var move = movement.y * speed * Time.deltaTime * transform.forward;
-        move += isFlying? speed * Time.deltaTime * transform.up : Vector3.zero;
+        move += (flyDuration > 0 || isFlying)? speed * Time.deltaTime * transform.up : Vector3.zero;
         rb.MovePosition(transform.position + move);
 
-        if (movement != Vector2.zero || isFlying) {
+        if (movement != Vector2.zero || flyDuration > 0 || isFlying) {
             for (int i = 0; i < propelers.Count; i++) {
                 var propeler = propelers[i];
                 if (propelerRotateSpeeds[i] < propelerMaxRotateSpeed)
@@ -48,6 +51,8 @@ public class Drone : MonoBehaviour {
                 propeler.localRotation = Quaternion.Euler(0f, 0f, propelerRotateSpeeds[i] * Time.deltaTime) * propeler.localRotation;
             }
         }
+
+        flyDuration -= Time.deltaTime;
     }
 
     private void InputManager_OnMovePerformed(object sender, InputManager.OnMovePerformed_EventArgs e) {
@@ -57,6 +62,18 @@ public class Drone : MonoBehaviour {
     private void InputManager_OnFlyPerformed(object sender, InputManager.OnFlyPerformed_EventArgs e) {
         isFlying = e.fly;
         // rb.useGravity = !isFlying;
+    }
+
+    private void InputManager_OnInputReceived(object sender, InputManager.OnInputReceived_EventArgs e) {
+        int command = e.command;
+        if (command == 0) {
+            print("fly");
+            flyDuration = 3;
+        } else if (command == 1) {
+            print("stop");
+        } else if (command == 2) {
+            print("turn");
+        }
     }
 
     void OnCollisionEnter(Collision collision) {
