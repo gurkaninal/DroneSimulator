@@ -105,12 +105,16 @@ public class InputManager : MonoBehaviour {
     }
 
     void OnOutputReceived(object sender, DataReceivedEventArgs e) {
-        OnInputReceived?.Invoke(this, new() { command = Int32.Parse(e.Data) });
+        if (!string.IsNullOrEmpty(e.Data)) {
+            print("Python Output: " + e.Data);
+        }
     }
 
     void OnErrorReceived(object sender, DataReceivedEventArgs e) {
         if (!string.IsNullOrEmpty(e.Data)) {
             print("Python Error: " + e.Data);
+            print(e);
+            OnInputReceived?.Invoke(this, new() { command = Int32.Parse(e.Data) });
         }
     }
 }
