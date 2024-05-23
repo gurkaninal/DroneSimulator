@@ -147,4 +147,5 @@ PackageBackups/
 .vsconfig
 last_save.json
 
-# Assets/Scripts/DroneController.py
+Assets/Scripts/DroneController.py
+Assets/Scripts/DroneController.py.meta

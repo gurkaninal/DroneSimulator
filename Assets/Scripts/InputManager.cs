@@ -6,15 +6,13 @@ using UnityEngine.InputSystem;
 public class InputManager : MonoBehaviour {
     public static InputManager Instance;
 
-    public event EventHandler<OnMovePerformed_EventArgs> OnMovePerformed;
-    public class OnMovePerformed_EventArgs : EventArgs {
-        public Vector2 movement;
+    public event EventHandler<OnPerformed_EventArgs> OnFlyPerformed;
+    public class OnPerformed_EventArgs : EventArgs {
+        public bool isPerformed;
     }
 
-    public event EventHandler<OnFlyPerformed_EventArgs> OnFlyPerformed;
-    public class OnFlyPerformed_EventArgs : EventArgs {
-        public bool fly;
-    }
+    public event EventHandler OnTurnLeftPerformed;
+    public event EventHandler OnTurnRightPerformed;
 
     public event EventHandler<OnInputReceived_EventArgs> OnInputReceived;
     public class OnInputReceived_EventArgs : EventArgs {
@@ -47,37 +45,37 @@ public class InputManager : MonoBehaviour {
     private void OnEnable() {
         inputActions.Player.Enable();
 
-        inputActions.Player.Move.performed += InputActions_OnMovePerformed;
-        inputActions.Player.Move.canceled += InputActions_OnMoveCanceled;
-
         inputActions.Player.Fly.performed += InputActions_OnFlyPerformed;
         inputActions.Player.Fly.canceled += InputActions_OnFlyCanceled;
+
+        inputActions.Player.TurnLeft.performed += InputActions_OnTurnLeftPerformed;
+        inputActions.Player.TurnRight.performed += InputActions_OnTurnRightPerformed;
     }
 
     private void OnDisable() {
-        inputActions.Player.Move.performed -= InputActions_OnMovePerformed;
-        inputActions.Player.Move.canceled -= InputActions_OnMoveCanceled;
-
         inputActions.Player.Fly.performed -= InputActions_OnFlyPerformed;
         inputActions.Player.Fly.canceled -= InputActions_OnFlyCanceled;
+
+        inputActions.Player.TurnLeft.performed -= InputActions_OnTurnLeftPerformed;
+        inputActions.Player.TurnRight.performed -= InputActions_OnTurnRightPerformed;
 
         inputActions.Player.Disable();
     }
 
-    private void InputActions_OnMovePerformed(InputAction.CallbackContext context) {
-        OnMovePerformed?.Invoke(this, new() { movement = context.ReadValue<Vector2>()});
-    }
-
-    private void InputActions_OnMoveCanceled(InputAction.CallbackContext context) {
-        OnMovePerformed?.Invoke(this, new() { movement = Vector2.zero });
-    }
-
     private void InputActions_OnFlyPerformed(InputAction.CallbackContext context) {
-        OnFlyPerformed?.Invoke(this, new() { fly = true });
+        OnFlyPerformed?.Invoke(this, new() { isPerformed = true });
     }
 
     private void InputActions_OnFlyCanceled(InputAction.CallbackContext context) {
-        OnFlyPerformed?.Invoke(this, new() { fly = false });
+        OnFlyPerformed?.Invoke(this, new() { isPerformed = false });
+    }
+
+    private void InputActions_OnTurnLeftPerformed(InputAction.CallbackContext context) {
+        OnTurnLeftPerformed?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void InputActions_OnTurnRightPerformed(InputAction.CallbackContext context) {
+        OnTurnRightPerformed?.Invoke(this, EventArgs.Empty);
     }
 
     void RunPythonScript() {
